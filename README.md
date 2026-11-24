@@ -2,7 +2,7 @@
 
 Prototipos y muestrarios de **visualización de datos con animación**: globo 3D, GSAP, y una galería de 21 portadas con fondo animado (canvas). Todo con **datos simulados**.
 
-> **Demo:** `https://<usuario>.github.io/<repositorio>/` *(se activa con GitHub Pages; ver abajo)*
+> **Demo:** https://jesussamuelhernandez.github.io/laboratorio-dashboards-animados/
 
 ## Qué hay
 
