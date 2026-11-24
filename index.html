@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laboratorio de dashboards animados</title>
+    <link rel="stylesheet" href="/src/shared/styles/base.css" />
+    <style>
+      .index { max-width: 720px; margin: 8vh auto; padding: 0 24px; }
+      .index a { display:block; padding:18px 20px; margin-top:12px; border:1px solid var(--line); border-radius:12px; background:var(--panel); color:var(--text); text-decoration:none; transition:border-color .2s, transform .2s; }
+      .index a:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .index small { display:block; color: var(--muted); margin-top:4px; }
+    </style>
+  </head>
+  <body>
+    <main class="index">
+      <h1>Laboratorio de dashboards animados</h1>
+      <p style="color:var(--muted)">Globe.gl · GSAP · ECharts · Spline · Rive</p>
+      <a href="p01-globe-kpi/">P01 · Globo ejecutivo + KPIs animados
+        <small>Globe.gl + GSAP + React — logística global</small></a>
+      <a href="p02-gsap-lab/">P02 · GSAP Lab
+        <small>Flip, stagger, SplitText, DrawSVG, MorphSVG, ScrollTrigger, quickTo</small></a>
+      <a href="p03-gsap-catalog/">P03 · Muestrario GSAP (tema claro)
+        <small>30 animaciones para tableros y mapas, con selección de favoritas</small></a>
+      <a href="p04-premium/">P04 · Detalles premium (botones, controles, KPI, gráficos, mapas)
+        <small>Microinteracciones discretas y variantes de tus favoritas</small></a>
+      <a href="p05-portada/">P05 · Portada animada (anillos concéntricos)
+        <small>Fondo canvas con sistemas de anillos que se relacionan; HTML autocontenido</small></a>
+      <a href="portadas/">Galería de portadas animadas (21 fondos)
+        <small>Anillos, red, ondas, barras, globo, flujo, lluvia, sismógrafo, interferencia, burbujas, treemap, sankey, calor, radar, clústeres, colisiones, pipeline, circuitos, fractales y hierba</small></a>
+    </main>
+  </body>
+</html>

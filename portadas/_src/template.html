@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es" data-theme="__THEME__">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>__DOC_TITLE__</title>
+  <style>
+    :root {
+      --bg: #fffaf4; --ink: #1f2937; --muted: #6b7280;
+      --aqua: #12c7c7; --aqua-d: #0b8f98; --orange: #ff7a1a; --orange-d: #d85a00;
+      --ring: 31, 41, 55; --veil: 255, 250, 244; --line: #f1e4d6;
+    }
+    [data-theme="dark"] {
+      --bg: #07111f; --ink: #e8f1fb; --muted: #8fa3bd;
+      --aqua: #3be0e0; --aqua-d: #3be0e0; --orange: #ff9a45; --orange-d: #ff9a45;
+      --ring: 200, 220, 240; --veil: 7, 17, 31; --line: #1d2a44;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: radial-gradient(1000px 600px at 85% -10%, color-mix(in srgb, var(--aqua) 14%, transparent), transparent 60%),
+                  radial-gradient(900px 600px at 0% 0%, color-mix(in srgb, var(--orange) 14%, transparent), transparent 55%), var(--bg);
+      color: var(--ink); font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; overflow: hidden; transition: background-color .5s, color .5s;
+    }
+    #bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+    .veil { position: fixed; inset: 0; pointer-events: none; z-index: 1; width: min(920px, 96vw); height: min(560px, 70vh); margin: auto;
+      background: radial-gradient(closest-side at 50% 48%, rgba(var(--veil), .9), rgba(var(--veil), .5) 55%, transparent 100%); }
+    main { position: relative; z-index: 2; height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; pointer-events: none; }
+    main > div { max-width: 860px; }
+    a, button { pointer-events: auto; }
+    .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .22em; color: var(--aqua-d); text-transform: uppercase; }
+    h1 { margin: 14px 0 0; font-size: clamp(44px, 8.6vw, 104px); line-height: .98; letter-spacing: -0.035em; font-weight: 700; }
+    h1 .line { display: block; overflow: hidden; padding-bottom: .08em; }
+    h1 .line > span { display: inline-block; }
+    h1 em { font-style: normal; background: linear-gradient(90deg, var(--orange), var(--aqua)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { margin: 22px auto 0; max-width: 560px; color: var(--muted); font-size: clamp(16px, 2vw, 19px); line-height: 1.5; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 32px; }
+    .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font: inherit; font-weight: 600; padding: 12px 24px; border-radius: 12px; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+    .btn span { position: relative; z-index: 1; transition: color .25s; }
+    .btn.primary { background: var(--orange); color: #fff; border: 0; box-shadow: 0 10px 24px color-mix(in srgb, var(--orange) 35%, transparent); }
+    .btn.primary::before { content: ''; position: absolute; inset: 0; background: var(--aqua); transform: translateY(101%); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+    .btn.primary:hover::before, .btn.primary:focus-visible::before { transform: translateY(0); }
+    .btn.primary:hover span, .btn.primary:focus-visible span { color: #04312f; }
+    .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid rgba(var(--ring), .25); }
+    .btn.ghost:hover, .btn.ghost:focus-visible { border-color: var(--aqua); color: var(--aqua-d); }
+    .btn:active { transform: scale(.97); }
+    .btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; position: relative; z-index: 1; }
+    .btn:hover svg { transform: translateX(4px); }
+    :focus-visible { outline: 3px solid color-mix(in srgb, var(--aqua) 60%, transparent); outline-offset: 3px; }
+    .hud { position: fixed; z-index: 3; left: 24px; bottom: 22px; display: flex; gap: 18px; font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+    .hud { background: rgba(var(--veil), .72); padding: 8px 14px; border-radius: 99px; backdrop-filter: blur(6px); border: 1px solid rgba(var(--ring), .12); }
+    .hud b { color: var(--ink); font-variant-numeric: tabular-nums; margin-left: 6px; }
+    .ctrl { position: fixed; z-index: 3; right: 20px; bottom: 16px; display: flex; gap: 8px; }
+    .ctrl button, .ctrl a { background: rgba(var(--veil), .7); color: var(--muted); border: 1px solid rgba(var(--ring), .18); border-radius: 99px; padding: 7px 14px; font: 600 12px inherit; font-family: inherit; cursor: pointer; backdrop-filter: blur(6px); transition: border-color .2s, color .2s; text-decoration: none; }
+    .ctrl button:hover, .ctrl a:hover { border-color: var(--aqua); color: var(--aqua-d); }
+    @media (max-width: 640px) { .hud { gap: 10px; font-size: 10px; left: 14px; bottom: 56px; } .ctrl { right: 14px; bottom: 12px; } }
+  </style>
+</head>
+<body>
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+
+  <main>
+    <div>
+      <span class="eyebrow">__EYEBROW__</span>
+      <h1>
+        <span class="line"><span>__LINE1__</span></span>
+        <span class="line"><span>__LINE2__</span></span>
+      </h1>
+      <p class="lead">__LEAD__</p>
+      <div class="cta">
+        <a class="btn primary" href="../index.html"><span>Explorar prototipos</span><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></a>
+        <a class="btn ghost" href="../p03-gsap-catalog/index.html"><span>Ver muestrario</span></a>
+      </div>
+    </div>
+  </main>
+
+  <div class="hud" id="hud" aria-live="off"></div>
+  <div class="ctrl">
+    <a href="index.html">☰ Portadas</a>
+    <button id="b-pause" type="button">❚❚ Pausar</button>
+    <button id="b-theme" type="button">◐ Tema</button>
+  </div>
+
+  <!-- GSAP solo para la entrada del texto; si no carga, todo se ve igual (sin animar). -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script>
+  (() => {
+    'use strict'
+    const $ = (s) => document.querySelector(s)
+    const cvs = $('#bg'), ctx = cvs.getContext('2d')
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const TAU = Math.PI * 2
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v))
+    const lerp = (a, b, k) => a + (b - a) * k
+    const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3)
+
+    let W = 0, H = 0, DPR = 1, pal = {}
+    let paused = reduce, tv = reduce ? 5 : 0, last = 0, raf = 0
+    const mouse = { x: -9999, y: -9999, sx: -9999, sy: -9999, on: false, down: false }
+
+    const hex = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})` }
+    const neutral = (a) => `rgba(${pal.ring},${a})`
+    function readPal() {
+      const cs = getComputedStyle(document.documentElement)
+      pal = { aqua: cs.getPropertyValue('--aqua').trim(), orange: cs.getPropertyValue('--orange').trim(), ring: cs.getPropertyValue('--ring').trim(), dark: document.documentElement.dataset.theme === 'dark' }
+    }
+    let hudKey = ''
+    function setHud(pairs) {
+      const key = pairs.map((p) => p.join('')).join('|'); if (key === hudKey) return; hudKey = key
+      $('#hud').innerHTML = pairs.map(([k, v]) => `<span>${k}<b>${v}</b></span>`).join('')
+    }
+    function smoothMouse(k = 0.12) { if (mouse.on) { mouse.sx = lerp(mouse.sx, mouse.x, k); mouse.sy = lerp(mouse.sy, mouse.y, k) } }
+
+    /* ═════════ FONDO ESPECÍFICO DE ESTA PORTADA ═════════ */
+    __COVER_SCRIPT__
+    /* ═════════ FIN FONDO ═════════ */
+
+    function draw() { if (!COVER.noClear) ctx.clearRect(0, 0, W, H); COVER.frame(tv) }
+    function loop(now) { raf = requestAnimationFrame(loop); const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now; tv += dt; draw() }
+    function play() { if (raf) return; last = performance.now(); raf = requestAnimationFrame(loop) }
+    function stop() { cancelAnimationFrame(raf); raf = 0 }
+    function setPaused(p) { paused = p; p ? stop() : play(); $('#b-pause').textContent = p ? '▶ Reanudar' : '❚❚ Pausar'; if (p) draw() }
+
+    function resize() {
+      DPR = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight
+      cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
+      COVER.build()
+      if (reduce && COVER.noClear) for (let i = 0; i < 180; i++) { tv += 0.016; COVER.frame(tv) }
+      if (paused) draw()
+    }
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 120) })
+
+    addEventListener('pointermove', (e) => {
+      if (!mouse.on) { mouse.sx = e.clientX; mouse.sy = e.clientY }
+      if (mouse.down && COVER.drag) COVER.drag(e.clientX - mouse.x, e.clientY - mouse.y)
+      mouse.x = e.clientX; mouse.y = e.clientY; mouse.on = true
+    })
+    document.addEventListener('pointerleave', () => { mouse.on = false; mouse.down = false })
+    addEventListener('pointerup', () => { mouse.down = false })
+    addEventListener('pointerdown', (e) => {
+      if (e.target.closest('a,button')) return
+      mouse.down = true; if (COVER.click) COVER.click(e.clientX, e.clientY, tv)
+      if (paused) draw()
+    })
+    $('#b-pause').addEventListener('click', () => setPaused(!paused))
+    $('#b-theme').addEventListener('click', () => {
+      const dark = document.documentElement.dataset.theme !== 'dark'
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      try { localStorage.setItem('portadas-theme', dark ? 'dark' : 'light') } catch (e) { /* sin storage */ }
+      setTimeout(() => { readPal(); COVER.build(); if (paused) draw() }, 30)
+    })
+    try { const t = localStorage.getItem('portadas-theme'); if (t) document.documentElement.dataset.theme = t } catch (e) { /* sin storage */ }
+
+    readPal(); resize()
+    if (reduce) setPaused(true); else play()
+
+    if (window.gsap && !reduce) {
+      gsap.timeline({ defaults: { ease: 'power4.out' } })
+        .from('.eyebrow', { autoAlpha: 0, letterSpacing: '0.5em', duration: 1.2 })
+        .from('h1 .line > span', { yPercent: 115, duration: 1.1, stagger: 0.14 }, 0.15)
+        .from('.lead', { y: 18, autoAlpha: 0, duration: 0.8 }, 0.7)
+        .from('.cta .btn', { y: 16, autoAlpha: 0, duration: 0.7, stagger: 0.1 }, 0.85)
+        .from('.hud span, .ctrl button, .ctrl a', { autoAlpha: 0, y: 8, duration: 0.6, stagger: 0.06 }, 1.1)
+    }
+  })()
+  </script>
+</body>
+</html>

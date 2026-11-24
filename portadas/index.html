@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galería de portadas animadas</title>
+  <style>
+    :root { --bg:#fffaf4; --ink:#1f2937; --muted:#6b7280; --aqua:#12c7c7; --aqua-d:#0b8f98; --orange:#ff7a1a; --orange-d:#d85a00; --line:#f1e4d6; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(900px 500px at 85% -10%, #d9f7f6 0%, transparent 60%), radial-gradient(800px 500px at 0% 0%, #ffe9d6 0%, transparent 55%), var(--bg);
+      color: var(--ink); font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; min-height: 100vh; }
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+    header { padding: 7vh 0 30px; }
+    h1 { margin: 0; font-size: clamp(32px, 5vw, 52px); letter-spacing: -0.02em; line-height: 1.05; }
+    h1 em { font-style: normal; display: block; background: linear-gradient(90deg, var(--orange), var(--aqua)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    header p { color: var(--muted); max-width: 620px; font-size: 17px; margin: 14px 0 0; }
+    .back { display: inline-block; margin-bottom: 18px; color: var(--aqua-d); text-decoration: none; font-weight: 600; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 22px; }
+    a.card { display: block; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+      box-shadow: 0 2px 10px rgba(120,70,20,.05); transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s; }
+    a.card:hover, a.card:focus-visible { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(255,122,26,.16); border-color: var(--orange); outline: none; }
+    .thumb { position: relative; aspect-ratio: 1400 / 820; overflow: hidden; background: #0b1424; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+    a.card:hover .thumb img { transform: scale(1.05); }
+    .badge { position: absolute; left: 12px; top: 12px; font: 700 12px ui-monospace, Menlo, monospace; background: rgba(255,255,255,.92); color: var(--aqua-d); padding: 4px 10px; border-radius: 99px; }
+    .tag { position: absolute; right: 12px; top: 12px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: rgba(7,17,31,.75); color: #e8f1fb; }
+    .tag.light { background: rgba(255,255,255,.9); color: var(--ink); }
+    .meta { padding: 16px 18px 18px; }
+    .meta h2 { margin: 0; font-size: 18px; }
+    .meta p { margin: 6px 0 12px; color: var(--muted); font-size: 14px; line-height: 1.45; }
+    .go { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; color: var(--orange-d); }
+    .go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; }
+    a.card:hover .go svg { transform: translateX(5px); }
+    footer { margin-top: 36px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="back" href="../index.html">← Laboratorio</a>
+      <h1>Galería de portadas <em>con fondo animado</em></h1>
+      <p>Veintiuna portadas, cada una en su propio HTML autocontenido. Todas arrancan en tema claro, responden al cursor, permiten cambiar a oscuro, botón de pausa y respetan <code>prefers-reduced-motion</code>.</p>
+    </header>
+
+    <main class="grid">
+      <a class="card" href="01-anillos.html"><div class="thumb"><img src="thumbs/01-anillos.jpg" alt="Anillos concéntricos" loading="lazy" /><span class="badge">01</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Anillos concéntricos</h2><p>Sistemas de anillos que derivan y respiran; donde se tocan nacen enlaces y nodos de cruce.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="02-red.html"><div class="thumb"><img src="thumbs/02-red.jpg" alt="Red de datos" loading="lazy" /><span class="badge">02</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Red de datos</h2><p>Constelación de nodos que se enlazan por cercanía con pulsos viajando; el cursor los atrae.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="03-ondas.html"><div class="thumb"><img src="thumbs/03-ondas.jpg" alt="Ondas de señal" loading="lazy" /><span class="badge">03</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Ondas de señal</h2><p>Cintas sinusoidales con muestras que leen valores; el clic lanza una onda que recorre la pantalla.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="04-barras.html"><div class="thumb"><img src="thumbs/04-barras.jpg" alt="Barras vivas" loading="lazy" /><span class="badge">04</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Barras vivas</h2><p>Ecualizador de indicadores con marcas de máximo que caen; el cursor levanta la señal.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="05-globo.html"><div class="thumb"><img src="thumbs/05-globo.jpg" alt="Globo de puntos" loading="lazy" /><span class="badge">05</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Globo de puntos</h2><p>Continentes de puntos reales y arcos de luz entre 11 ciudades. Se arrastra para girar.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="06-flujo.html"><div class="thumb"><img src="thumbs/06-flujo.jpg" alt="Campo de flujo" loading="lazy" /><span class="badge">06</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Campo de flujo</h2><p>Más de mil partículas siguen un campo vectorial y dejan estelas; el cursor crea un remolino.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="07-lluvia.html"><div class="thumb"><img src="thumbs/07-lluvia.jpg" alt="Lluvia" loading="lazy" /><span class="badge">07</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Lluvia</h2><p>Gotas que caen sobre agua en perspectiva y dejan anillos concéntricos que se cruzan; las naranjas son datos con su valor.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="08-sismografo.html"><div class="thumb"><img src="thumbs/08-sismografo.jpg" alt="Sismógrafo" loading="lazy" /><span class="badge">08</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Sismógrafo</h2><p>Cinco canales de señal en tiempo real con eventos que vibran y se desvanecen; el cursor lee valores.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="09-interferencia.html"><div class="thumb"><img src="thumbs/09-interferencia.jpg" alt="Interferencia" loading="lazy" /><span class="badge">09</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Interferencia</h2><p>Malla de puntos que se agranda con la suma de ondas circulares; el cursor es una fuente más.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="10-burbujas.html"><div class="thumb"><img src="thumbs/10-burbujas.jpg" alt="Burbujas de datos" loading="lazy" /><span class="badge">10</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Burbujas de datos</h2><p>Cada burbuja es una categoría con tamaño según su valor; se empujan entre sí y el cursor las aparta.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="11-treemap.html"><div class="thumb"><img src="thumbs/11-treemap.jpg" alt="Treemap vivo" loading="lazy" /><span class="badge">11</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Treemap vivo</h2><p>Áreas proporcionales al valor que se reacomodan con fluidez cuando los números cambian.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="12-sankey.html"><div class="thumb"><img src="thumbs/12-sankey.jpg" alt="Sankey animado" loading="lazy" /><span class="badge">12</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Sankey animado</h2><p>Caudales entre fuentes, procesos y destinos; el grosor es volumen y las partículas, tráfico.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="13-calor.html"><div class="thumb"><img src="thumbs/13-calor.jpg" alt="Mapa de calor" loading="lazy" /><span class="badge">13</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Mapa de calor</h2><p>Matriz de actividad con línea de tiempo; el cursor lee celdas y el clic lanza una onda.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="14-radar.html"><div class="thumb"><img src="thumbs/14-radar.jpg" alt="Radar de métricas" loading="lazy" /><span class="badge">14</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Radar de métricas</h2><p>Tres series sobre ocho ejes con un haz de barrido que ilumina cada vértice.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="15-clusteres.html"><div class="thumb"><img src="thumbs/15-clusteres.jpg" alt="Clústeres" loading="lazy" /><span class="badge">15</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Clústeres</h2><p>Puntos que migran entre grupos y elipses concéntricas de 1σ a 3σ; el cursor revela cada grupo.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="16-colisiones.html"><div class="thumb"><img src="thumbs/16-colisiones.jpg" alt="Colisiones de puntos" loading="lazy" /><span class="badge">16</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Colisiones que explotan</h2><p>Meteoritos en rumbo de colisión que estallan como fuegos artificiales, con chispas, destello y onda de choque.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="17-pipeline.html"><div class="thumb"><img src="thumbs/17-pipeline.jpg" alt="Pipeline de datos" loading="lazy" /><span class="badge">17</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Pipeline de datos</h2><p>Eventos que fluyen despacio por cinco etapas; los nodos saturados se ponen naranja.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="18-circuitos.html"><div class="thumb"><img src="thumbs/18-circuitos.jpg" alt="Circuitos como ciudad" loading="lazy" /><span class="badge">18</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Circuitos como ciudad</h2><p>Vista aérea de una placa: chips como edificios, pistas con giros de 45° y pocos pulsos de tráfico, lentos.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="19-julia.html"><div class="thumb"><img src="thumbs/19-julia.jpg" alt="Fractal de Julia" loading="lazy" /><span class="badge">19</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Fractal de Julia</h2><p>Conjunto de Julia calculado por píxel, coloreado con la paleta; el cursor cambia su forma.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="20-arbol.html"><div class="thumb"><img src="thumbs/20-arbol.jpg" alt="Árbol fractal de datos" loading="lazy" /><span class="badge">20</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Árbol fractal de datos</h2><p>Árbol recursivo opaco que crece, con una ola de savia que sube y hojas como puntos de datos.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="card" href="21-hierba.html"><div class="thumb"><img src="thumbs/21-hierba.jpg" alt="Hierba de datos" loading="lazy" /><span class="badge">21</span><span class="tag light">Claro</span></div>
+        <div class="meta"><h2>Hierba de datos</h2><p>Un prado de briznas que se mece despacio con el viento, con semillas como puntos de dato; el cursor aparta la hierba.</p><span class="go">Abrir <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></div></a>
+    </main>
+    <footer>Los fondos 02–21 se generan con <code>node portadas/_src/build.mjs</code> a partir de una plantilla común. Siguiente fase: aplicar ASCII art a estas portadas.</footer>
+  </div>
+</body>
+</html>
