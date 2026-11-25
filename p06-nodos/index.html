@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>P06 · Constelaciones en órbita</title>
+<style>
+  /* Misma familia visual que "Constelación": tres temas que redefinen tokens sobre :root[data-tema]. */
+  :root {
+    --bg:#f3f4f6; --fg:#151821; --muted:#6b7280; --line:#dfe2e8; --panel:#ffffff; --chip:#eceef3; --chip-fg:#2b303b;
+    --btn-bg:#151821; --btn-fg:#ffffff; --accent:#151821; --warn:#b45309;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; color-scheme: light;
+  }
+  :root[data-tema="oceano"] { --bg:#0a1d2e; --fg:#e6f3f8; --muted:#8fb0c0; --line:#1f4458; --panel:#0e2a3b; --chip:#14384c; --chip-fg:#bfe3f0; --btn-bg:#3a63ab; --btn-fg:#fff; --accent:#7fd8e6; --warn:#f0b35a; color-scheme: dark; }
+  :root[data-tema="neon"] { --bg:#000; --fg:#eaf6ff; --muted:#7f8c99; --line:#1c1f26; --panel:#0b0d12; --chip:#151922; --chip-fg:#9ff3ff; --btn-bg:#00e5ff; --btn-fg:#00181c; --accent:#00e5ff; --warn:#ffb000; color-scheme: dark; }
+  html, body { height:100%; }
+  body { background:var(--bg); color:var(--fg); font-family:var(--font); font-size:14px; line-height:1.45; margin:0; display:flex; flex-direction:column; gap:10px; padding-block:14px; padding-inline:max(16px, env(safe-area-inset-left, 0px)); box-sizing:border-box; overflow:hidden; }
+  header { display:flex; flex-direction:column; gap:8px; }
+  .fila { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; }
+  h1 { font-size:20px; line-height:1.2; margin:0; letter-spacing:-0.01em; }
+  #estado { font-family:var(--mono); font-size:12px; color:var(--muted); margin:0; flex:1 1 auto; min-width:0; }
+  .temas { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .temas button { font:inherit; font-size:12px; background:transparent; color:var(--fg); border:0; padding:6px 12px; cursor:pointer; }
+  .temas button + button { border-left:1px solid var(--line); }
+  .temas button[aria-pressed="true"] { background:var(--btn-bg); color:var(--btn-fg); }
+  button:focus-visible, a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; max-height:70px; overflow-y:auto; }
+  .chip { font:inherit; font-size:12px; display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--fg); cursor:pointer; }
+  .chip .n { color:var(--muted); }
+  .chip[aria-pressed="true"] { background:var(--btn-bg); color:var(--btn-fg); border-color:transparent; }
+  .chip[aria-pressed="true"] .n { color:inherit; opacity:.7; }
+  .chip i { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  #area { position:relative; flex:1 1 auto; min-height:320px; display:flex; min-width:0; overflow:hidden; }
+  #grafo { position:relative; flex:1 1 0; min-width:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab; }
+  canvas.hover { cursor:pointer; } canvas.drag { cursor:grabbing; }
+  #ayuda { position:absolute; left:10px; top:8px; font-size:11px; color:var(--muted); pointer-events:none; max-width:calc(100% - 20px); }
+  .nav { position:absolute; left:10px; bottom:10px; display:flex; gap:6px; align-items:center; }
+  .nav button { font:inherit; font-size:12px; padding:5px 11px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; }
+  .nav button:hover { border-color:var(--accent); }
+  .nav button[aria-pressed="true"] { background:var(--btn-bg); color:var(--btn-fg); border-color:transparent; }
+  .nav { flex-wrap:wrap; max-width:calc(100% - 20px); }
+  .nav span { font-family:var(--mono); font-size:11px; color:var(--muted); margin-left:4px; }
+  /* Ficha: a la derecha en pantallas anchas, hoja inferior en móvil */
+  #ficha { flex:0 0 0; margin-left:0; max-width:45%; background:var(--panel); color:var(--fg); border:0 solid var(--line); border-radius:8px; overflow:hidden; display:flex; opacity:0; visibility:hidden;
+    transition: flex-basis .34s cubic-bezier(.2,.8,.2,1), margin-left .34s cubic-bezier(.2,.8,.2,1), opacity .26s ease, visibility 0s linear .34s; }
+  #ficha.abierto { flex-basis:340px; margin-left:10px; border-width:1px; opacity:1; visibility:visible; transition-delay:0s; }
+  .interior { flex:0 0 auto; width:min(338px, 45vw); height:100%; overflow-y:auto; display:flex; flex-direction:column; }
+  .cabeza { position:relative; flex:0 0 auto; }
+  #p-vista { aspect-ratio:16/8; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:#fff; }
+  #p-vista b { font-size:52px; line-height:1; font-weight:700; } #p-vista span { font-family:var(--mono); font-size:12px; opacity:.85; }
+  .cerrar { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; border:0; background:rgba(0,0,0,.55); color:#fff; cursor:pointer; font-size:14px; }
+  .cuerpo { padding:14px; display:flex; flex-direction:column; gap:12px; }
+  #f-titulo { font-size:16px; font-weight:600; } #f-id { font-family:var(--mono); font-size:12px; color:var(--accent); }
+  #f-resumen { margin:0; line-height:1.55; }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0; font-size:13px; } dt { color:var(--muted); } dd { margin:0; text-align:right; font-variant-numeric:tabular-nums; }
+  .tags { display:flex; flex-wrap:wrap; gap:6px; } .tag { background:var(--chip); color:var(--chip-fg); border-radius:999px; padding:2px 10px; font-size:12px; }
+  #spark { width:100%; height:44px; }
+  .acciones button { font:inherit; font-size:12px; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:transparent; color:var(--fg); cursor:pointer; }
+  .acciones button.primario { background:var(--btn-bg); color:var(--btn-fg); border-color:transparent; }
+  @media (max-width:720px) {
+    #ficha { position:absolute; left:0; right:0; bottom:0; height:52%; max-width:none; flex:none; margin-left:0; border-width:1px; border-radius:12px 12px 8px 8px; box-shadow:0 -6px 24px rgba(0,0,0,.28); z-index:5; opacity:1; transform:translateY(105%); transition:transform .34s cubic-bezier(.2,.8,.2,1), visibility 0s linear .34s; }
+    #ficha.abierto { transform:none; margin-left:0; } .interior { width:100%; } #p-vista { aspect-ratio:21/8; }
+  }
+  @media (prefers-reduced-motion: reduce) { #ficha { transition:none; } }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="fila">
+    <h1>Constelaciones</h1>
+    <p id="estado" role="status"></p>
+    <div class="temas" role="group" aria-label="Tema visual">
+      <button type="button" data-tema="sombras" aria-pressed="true">Sombras</button>
+      <button type="button" data-tema="oceano" aria-pressed="false">Océano</button>
+      <button type="button" data-tema="neon" aria-pressed="false">Neón</button>
+    </div>
+  </div>
+  <div id="chips" class="chips" role="group" aria-label="Enfocar constelación"></div>
+</header>
+<div id="area">
+  <div id="grafo">
+    <canvas id="c" aria-label="Constelaciones de nodos girando alrededor de un centro"></canvas>
+    <span id="ayuda">Rueda: avanzar o retroceder · arrastra: girar la vista · toca un nodo para ver su detalle</span>
+    <div class="nav"><button id="bIn" type="button">＋</button><button id="bOut" type="button">－</button><button id="bMov" type="button" aria-pressed="true" title="Espacio">Movimiento</button><button id="bDir" type="button" aria-pressed="true">Mismo sentido</button><button id="bReset" type="button">Reiniciar vista</button><span id="dist"></span></div>
+  </div>
+  <aside id="ficha" aria-label="Detalle del nodo">
+    <div class="interior" id="ficha-int">
+      <div class="cabeza"><div id="p-vista"></div><button type="button" id="f-cerrar" class="cerrar" aria-label="Cerrar detalle">✕</button></div>
+      <div class="cuerpo">
+        <span id="f-titulo"></span><span id="f-id"></span>
+        <p id="f-resumen"></p>
+        <dl id="f-dl"></dl>
+        <svg id="spark" viewBox="0 0 100 30" preserveAspectRatio="none"></svg>
+        <div class="tags" id="f-tags"></div>
+        <div class="acciones"><button type="button" id="f-con" class="primario">Ver toda la constelación</button></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id)
+  const wrap = $('grafo'), cv = $('c'), ctx = cv.getContext('2d'), chipsEl = $('chips'), ficha = $('ficha')
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const TAU = Math.PI * 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t
+  const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))
+  const rg = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`
+
+  // ---- Temas (paleta y parámetros tomados de "Constelación") ----
+  const NEON = ['#00f0ff', '#ff2bd6', '#b6ff00', '#ffb000', '#8a5cff', '#ff3b5c', '#00ff9c', '#4d7cff', '#ff7a1a', '#12c7c7', '#ff8ad4', '#9be564'].map(hexRgb)
+  const TEMAS = {
+    sombras: { fondo: ['#ffffff', '#f1f2f5', '#e2e5ea'], nodo: () => [17, 19, 24], core: [17, 19, 24], sombra: 0.38, halo: null,
+      linea: [35, 40, 52], alfaLinea: 0.3, orbita: [35, 40, 52], texto: '#111318', rotulo: 'rgba(255,255,255,.9)', anillo: '#111318', anillo2: '#7a808c' },
+    oceano: { fondo: ['#14485a', '#0d2c42', '#150f2a'], nodo: () => [255, 255, 255], core: [255, 255, 255], sombra: 0, halo: [160, 220, 255],
+      linea: [255, 255, 255], alfaLinea: 0.28, orbita: [255, 255, 255], texto: '#ffffff', rotulo: 'rgba(8,30,45,.9)', anillo: '#7fd8e6', anillo2: '#ffffff' },
+    neon: { fondo: ['#000000', '#000000', '#000000'], nodo: (n) => NEON[n.con.i % NEON.length], core: [0, 229, 255], sombra: 0, halo: 'propio', neon: true,
+      linea: [255, 255, 255], alfaLinea: 0.5, orbita: [255, 255, 255], texto: '#e8f6ff', rotulo: 'rgba(0,0,0,.95)', anillo: '#ffffff', anillo2: '#00e5ff' },
+  }
+  let tema = 'sombras'
+  try { const g = localStorage.getItem('p06-tema'); if (g && TEMAS[g]) tema = g } catch (e) {}
+
+  // ---- Datos de prueba: 8 constelaciones con nodos unidos entre sí ----
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+  const DEFS = [['Logística', ['rutas', 'almacén', 'flota']], ['Finanzas', ['costos', 'ingresos', 'riesgo']], ['Salud', ['clínica', 'insumos', 'pacientes']], ['Energía', ['red', 'consumo', 'solar']],
+    ['Clima', ['sensores', 'lluvia', 'viento']], ['Transporte', ['rutas', 'tiempos', 'flota']], ['Educación', ['cursos', 'alumnos', 'becas']], ['Comercio', ['ventas', 'precios', 'clientes']],
+    ['Seguridad', ['accesos', 'alertas', 'riesgo']], ['Mantenimiento', ['equipos', 'tiempos', 'insumos']], ['Agricultura', ['cosecha', 'lluvia', 'suelo']], ['Turismo', ['reservas', 'rutas', 'clientes']], ['Industria', ['producción', 'calidad', 'energía']], ['Telecom', ['red', 'señal', 'consumo']]]
+  const ESTADOS = ['Operativo', 'Operativo', 'Operativo', 'En revisión', 'Degradado']
+  const cons = [], nodes = []
+  DEFS.forEach(([name, tags], i) => {
+    const c = { i, name, tags, nodes: [], edges: [], ro: 130 + i * 38 + rnd() * 20, tilt: (rnd() - 0.5) * 1.2, psi: rnd() * TAU, ang: rnd() * TAU,
+      w0: 0.07 + rnd() * 0.09, dir: rnd() < 0.35 ? -1 : 1, sp0: 0.08 + rnd() * 0.2, spdir: rnd() < 0.5 ? -1 : 1, spa: 0, pin: 0, pinNode: null }
+    const cnt = 7 + Math.floor(rnd() * 6)
+    for (let k = 0; k < cnt; k++) {
+      const u = rnd() * 2 - 1, a = rnd() * TAU, s = Math.sqrt(1 - u * u), rad = 28 + rnd() * 80
+      const n = { id: nodes.length, con: c, name: `${name} · ${String(k + 1).padStart(2, '0')}`, lx: Math.cos(a) * s * rad, ly: u * rad * 0.8, lz: Math.sin(a) * s * rad,
+        r: k === 0 ? 9 + rnd() * 2 : 4 + rnd() * 4, val: Math.round(20 + rnd() * 80), delta: (rnd() * 16 - 6).toFixed(1), lat: Math.round(4 + rnd() * 90), est: ESTADOS[Math.floor(rnd() * ESTADOS.length)],
+        tags: [tags[Math.floor(rnd() * tags.length)], tags[Math.floor(rnd() * tags.length)]], spark: Array.from({ length: 20 }, () => 20 + rnd() * 80), deg: 0 }
+      c.nodes.push(n); nodes.push(n)
+    }
+    // aristas: árbol de expansión mínimo (Prim) + un par de aristas cortas extra → forma de constelación
+    const d = (p, q) => Math.hypot(p.lx - q.lx, p.ly - q.ly, p.lz - q.lz), inT = new Set([0]), key = new Set()
+    while (inT.size < c.nodes.length) { let best = null; for (const a of inT) c.nodes.forEach((q, j) => { if (!inT.has(j)) { const w = d(c.nodes[a], q); if (!best || w < best.w) best = { a, j, w } } }); inT.add(best.j); c.edges.push([best.a, best.j]); key.add(best.a + '|' + best.j) }
+    const extra = []; for (let a = 0; a < c.nodes.length; a++) for (let b = a + 1; b < c.nodes.length; b++) if (!key.has(a + '|' + b) && !key.has(b + '|' + a)) extra.push([a, b, d(c.nodes[a], c.nodes[b])])
+    extra.sort((x, y) => x[2] - y[2]).slice(0, 2).forEach(([a, b]) => c.edges.push([a, b]))
+    c.edges.forEach(([a, b]) => { c.nodes[a].deg++; c.nodes[b].deg++ })
+    c.nodes.forEach((n) => (n.r *= 1 + 0.07 * n.deg))
+    cons.push(c)
+  })
+  // redes entre constelaciones: puentes tenues entre los nodos principales
+  const bridges = []; const bk = new Set()
+  cons.forEach((c, i) => [1, i % 2 ? 3 : 5].forEach((d) => { const o = cons[(i + d) % cons.length], k = [c.i, o.i].sort().join('|'); if (o !== c && !bk.has(k)) { bk.add(k); bridges.push([c.nodes[0], o.nodes[0]]); c.nodes[0].deg++; o.nodes[0].deg++ } }))
+  const totalEdges = cons.reduce((s, c) => s + c.edges.length, 0) + bridges.length
+
+  // ---- Estado de cámara / interacción ----
+  let W = 0, H = 0, DPR = 1, T = 0, ts = 1, last = 0
+  const F = 700, NEAR = 40, BLUR_D = 380, CAM0 = 1000, CAM_MIN = -420, CAM_MAX = 1800
+  let yaw = 0.5, pitch = -0.32, vyaw = 0, vpitch = 0, camZ = CAM0, camT = CAM0, prevCam = CAM0
+  let dragging = false, moved = 0, lx = 0, ly = 0, mx = -1, my = -1, hovered = null, selected = null, selCon = null, focus = null
+  let order = []
+  let sameDir = true, moving = true, beta = 0, A = [0, 0, 0], Atgt = [0, 0, 0]   // beta: 0 = gira el núcleo, 1 = gira el nodo seleccionado
+
+  const cs = () => ({ cy: Math.cos(yaw), sy: Math.sin(yaw), cp: Math.cos(pitch), sp: Math.sin(pitch), px: beta * A[0], py: beta * A[1], pz: beta * A[2] })
+  function orbitPos(c, a) { // posición del centro de la constelación en su plano inclinado
+    const x = Math.cos(a) * c.ro, z = Math.sin(a) * c.ro, ct = Math.cos(c.tilt), st = Math.sin(c.tilt), y1 = -z * st, z1 = z * ct
+    const cp = Math.cos(c.psi), sp = Math.sin(c.psi); return [x * cp + z1 * sp, y1, -x * sp + z1 * cp]
+  }
+  function worldUpdate() {
+    for (const c of cons) {
+      const [ox, oy, oz] = orbitPos(c, c.ang), cs_ = Math.cos(c.spa), ss = Math.sin(c.spa), pin = c.pin, q = c.pinNode
+      const qx = q ? q.lx * cs_ + q.lz * ss : 0, qy = q ? q.ly : 0, qz = q ? -q.lx * ss + q.lz * cs_ : 0
+      let sx = 0, sy = 0, sz = 0
+      for (const n of c.nodes) {
+        const rx = n.lx * cs_ + n.lz * ss, ry = n.ly, rz = -n.lx * ss + n.lz * cs_
+        let x = ox + rx + beta * A[0], y = oy + ry + (reduce ? 0 : Math.sin(T * 0.7 + n.id) * 3) + beta * A[1], z = oz + rz + beta * A[2]
+        if (pin > 0.001 && q) { x = lerp(x, A[0] + rx - qx, pin); y = lerp(y, A[1] + ry - qy, pin); z = lerp(z, A[2] + rz - qz, pin) }   // el nodo elegido queda fijo y su constelación gira a su alrededor
+        n.wx = x; n.wy = y; n.wz = z; sx += x; sy += y; sz += z
+      }
+      c.cx = sx / c.nodes.length; c.cy = sy / c.nodes.length; c.cz = sz / c.nodes.length
+    }
+  }
+  function proj(x, y, z, V) {
+    x -= V.px; y -= V.py; z -= V.pz
+    const x1 = x * V.cy + z * V.sy, z1 = -x * V.sy + z * V.cy, y2 = y * V.cp - z1 * V.sp, z2 = y * V.sp + z1 * V.cp, d = camZ - z2
+    if (d <= NEAR) return null
+    const k = F / d; return { x: W / 2 + x1 * k, y: H / 2 + y2 * k, d, k }
+  }
+
+  function resize() { DPR = Math.min(2, devicePixelRatio || 1); W = wrap.clientWidth; H = wrap.clientHeight; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0) }
+  new ResizeObserver(resize).observe(wrap)
+
+  // ---- Dibujo ----
+  function disco(x, y, r, col, a, b) { // b = desenfoque (0 nítido … 1 muy difuso)
+    if (b < 0.03) { ctx.fillStyle = rg(col, a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); return }
+    const R = r * (1 + b * 0.55), g = ctx.createRadialGradient(x, y, 0, x, y, R)
+    g.addColorStop(0, rg(col, a)); g.addColorStop(clamp(0.92 - b * 0.8, 0.12, 0.92), rg(col, a)); g.addColorStop(1, rg(col, 0))
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill()
+  }
+  function rotulo(txt, x, y, Th, alpha) {
+    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineJoin = 'round'
+    ctx.globalAlpha = alpha; ctx.lineWidth = 3; ctx.strokeStyle = Th.rotulo; ctx.fillStyle = Th.texto; ctx.strokeText(txt, x, y); ctx.fillText(txt, x, y); ctx.globalAlpha = 1
+  }
+  const dimOf = (n) => (selCon && n.con !== selCon ? (selected ? 0.5 : 0.18) : 1)
+  const fogOf = (d) => 1 - 0.55 * clamp((d - 1300) / 1800)
+
+  function frame(ts_) {
+    requestAnimationFrame(frame)
+    const t = ts_ / 1000, dt = Math.min(0.05, t - last); last = t
+    if (document.hidden || !W) return
+    const tsT = !moving || reduce ? 0 : selected ? 0.6 : selCon ? 0.22 : 1
+    ts = lerp(ts, tsT, 1 - Math.pow(0.02, dt)); if (tsT === 0 && ts < 0.003) ts = 0; const dtm = dt * ts; T += dtm
+    for (const c of cons) {
+      c.ang += c.w0 * (sameDir ? 1 : c.dir) * dtm; c.spa += c.sp0 * (sameDir ? 1 : c.spdir) * dtm
+      const isSel = !!selected && selected.con === c; if (isSel) c.pinNode = selected; c.pin = lerp(c.pin, isSel ? 1 : 0, 1 - Math.pow(0.003, dt))
+    }
+    beta = lerp(beta, selected ? 1 : 0, 1 - Math.pow(0.003, dt))
+    if (selected) A = beta < 0.02 ? Atgt.slice() : A.map((v, i) => lerp(v, Atgt[i], 1 - Math.pow(0.001, dt)))
+    camT = clamp(camT, CAM_MIN, CAM_MAX); camZ = lerp(camZ, camT, 1 - Math.pow(0.0015, dt))
+    worldUpdate()
+    // foco: con un nodo elegido el pivote de la vista YA es el nodo (se queda centrado); con una constelación enfocada la cámara la sigue
+    if (focus && !dragging) {
+      if (focus.con) { const p = [focus.con.cx, focus.con.cy, focus.con.cz], h = Math.hypot(p[0], p[2]) || 1, k = 1 - Math.pow(0.004, dt), ty = Math.atan2(-p[0], p[2]); yaw += Math.atan2(Math.sin(ty - yaw), Math.cos(ty - yaw)) * k; pitch += (Math.atan2(p[1], h) - pitch) * k }
+      vyaw = vpitch = 0
+    } else if (!dragging) { yaw += vyaw * dt; pitch = clamp(pitch + vpitch * dt, -1.3, 1.3); vyaw *= Math.pow(0.08, dt); vpitch *= Math.pow(0.08, dt); if (moving && !reduce && !selCon) yaw += 0.03 * dt }
+
+    const Th = TEMAS[tema], V = cs()
+    // fondo
+    const g = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H / 2, Math.max(W, H) * 0.75); Th.fondo.forEach((c, i) => g.addColorStop(i / 2, c)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+
+    // proyección de nodos
+    order = []
+    for (const n of nodes) { const p = proj(n.wx, n.wy, n.wz, V); if (!p) { n.p = null; continue } n.p = p; n.sr = n.r * p.k; n.b = n === selected ? 0 : clamp(1 - p.d / BLUR_D); order.push(n) }
+    order.sort((a, b) => b.p.d - a.p.d)
+
+    // órbitas guía (muy tenues)
+    ctx.lineWidth = 1
+    for (const c of cons) {
+      let pen = false; ctx.beginPath()
+      for (let i = 0; i <= 96; i++) { const q = orbitPos(c, (i / 96) * TAU), p = proj(q[0] + beta * A[0], q[1] + beta * A[1], q[2] + beta * A[2], V); if (!p) { pen = false; continue } pen ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); pen = true }
+      ctx.strokeStyle = rg(Th.orbita, (c === selCon ? 0.2 : selCon ? (selected ? 0.1 : 0.025) : 0.06) * (1 - c.pin)); ctx.stroke()
+    }
+    // núcleo central
+    const o = proj(0, 0, 0, V)
+    if (o) {
+      const r = 20 * o.k, a = clamp((o.d - NEAR) / 120) * (1 - 0.6 * beta), pulse = 1 + 0.06 * Math.sin(T * 1.6)
+      if (Th.halo) { const col = Th.core, hg = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, r * 5); hg.addColorStop(0, rg(col, 0.4 * a)); hg.addColorStop(1, rg(col, 0)); ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(o.x, o.y, r * 5, 0, TAU); ctx.fill() }
+      else { const sg = ctx.createRadialGradient(o.x + r * 0.4, o.y + r * 0.8, 0, o.x + r * 0.4, o.y + r * 0.8, r * 2); sg.addColorStop(0, rg([0, 0, 0], 0.3 * a)); sg.addColorStop(1, rg([0, 0, 0], 0)); ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(o.x + r * 0.4, o.y + r * 0.8, r * 2, 0, TAU); ctx.fill() }
+      disco(o.x, o.y, r, Th.core, a, clamp(1 - o.d / BLUR_D))
+      for (const [m, al] of [[1.7, 0.5], [2.5 * pulse, 0.28], [3.5, 0.14]]) { ctx.strokeStyle = rg(Th.core, al * a); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(o.x, o.y, r * m, 0, TAU); ctx.stroke() }
+    }
+    // aristas de cada constelación
+    ctx.lineCap = 'round'
+    for (const c of cons) for (const [ia, ib] of c.edges) {
+      const A = c.nodes[ia], B = c.nodes[ib]; if (!A.p || !B.p) continue
+      const al = Th.alfaLinea * dimOf(A) * fogOf((A.p.d + B.p.d) / 2) * clamp((Math.min(A.p.d, B.p.d) - NEAR) / 160) * (selected && (A === selected || B === selected) ? 2.4 : 1)
+      ctx.lineWidth = clamp(0.9 * (A.p.k + B.p.k) / 2, 0.5, 2.4)
+      if (Th.neon) { const gr = ctx.createLinearGradient(A.p.x, A.p.y, B.p.x, B.p.y); gr.addColorStop(0, rg(Th.nodo(A), Math.min(1, al))); gr.addColorStop(1, rg(Th.nodo(B), Math.min(1, al))); ctx.strokeStyle = gr }
+      else ctx.strokeStyle = rg(Th.linea, Math.min(0.9, al))
+      ctx.beginPath(); ctx.moveTo(A.p.x, A.p.y); ctx.lineTo(B.p.x, B.p.y); ctx.stroke()
+    }
+    // puentes entre constelaciones (punteados y más tenues)
+    ctx.setLineDash([3, 6]); ctx.lineWidth = 0.8
+    for (const [A, B] of bridges) { if (!A.p || !B.p) continue
+      const al = Th.alfaLinea * 0.7 * Math.min(dimOf(A), dimOf(B)) * fogOf((A.p.d + B.p.d) / 2) * clamp((Math.min(A.p.d, B.p.d) - NEAR) / 160)
+      ctx.strokeStyle = rg(Th.linea, Math.min(0.6, al)); ctx.beginPath(); ctx.moveTo(A.p.x, A.p.y); ctx.lineTo(B.p.x, B.p.y); ctx.stroke() }
+    ctx.setLineDash([])
+    // nodos, de lejos a cerca: sombra o resplandor + disco plano
+    for (const n of order) {
+      const { x, y, d } = n.p, r = n.sr, b = n.b, col = Th.nodo(n)
+      if (x < -r * 4 || x > W + r * 4 || y < -r * 4 || y > H + r * 4) continue
+      const al = clamp((d - NEAR) / 120) * dimOf(n) * fogOf(d) * (1 - 0.1 * b)
+      if (Th.sombra) { const ox = x + r * (0.45 + b * 0.5), oy = y + r * (0.85 + b * 0.6), sr = r * (1.5 + b), sg = ctx.createRadialGradient(ox, oy, r * 0.2, ox, oy, sr); sg.addColorStop(0, rg([0, 0, 0], Th.sombra * al * (1 - b * 0.5))); sg.addColorStop(1, rg([0, 0, 0], 0)); ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(ox, oy, sr, 0, TAU); ctx.fill() }
+      if (Th.halo) { const hc = Th.halo === 'propio' ? col : Th.halo, hr = r * (2.6 + b), hg = ctx.createRadialGradient(x, y, r * 0.3, x, y, hr); hg.addColorStop(0, rg(hc, 0.5 * al)); hg.addColorStop(1, rg(hc, 0)); ctx.save(); if (Th.neon) ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(x, y, hr, 0, TAU); ctx.fill(); ctx.restore() }
+      disco(x, y, r, col, al, b)
+      if (n === selected) {
+        const pu = (T * 1.4 % 1.6) / 1.6; ctx.lineWidth = 1.6; ctx.strokeStyle = Th.anillo; ctx.globalAlpha = al; ctx.beginPath(); ctx.arc(x, y, r + 6, 0, TAU); ctx.stroke()
+        ctx.globalAlpha = al * (1 - pu); ctx.strokeStyle = Th.anillo2; ctx.beginPath(); ctx.arc(x, y, r + 6 + pu * 30, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1
+      } else if (n === hovered) { ctx.lineWidth = 1.4; ctx.strokeStyle = Th.anillo; ctx.beginPath(); ctx.arc(x, y, r + 4, 0, TAU); ctx.stroke() }
+    }
+    // rótulos: nombre de cada constelación, y del nodo al pasar el cursor / seleccionar
+    for (const c of cons) { const p = proj(c.cx, c.cy, c.cz, V); if (!p || p.d < 160) continue; rotulo(c.name, p.x, p.y - 62 * p.k - 14, Th, 0.85 * dimOf({ con: c }) * fogOf(p.d)) }
+    for (const n of [selected, hovered]) if (n && n.p) rotulo(n.name, n.p.x, n.p.y + n.sr + 8, Th, 1)
+
+    // hover (nodo más cercano a la cámara bajo el cursor)
+    hovered = dragging ? null : pick(mx, my)
+    cv.classList.toggle('hover', !!hovered); cv.classList.toggle('drag', dragging)
+    $('dist').textContent = `profundidad ${Math.round(camZ)}`
+  }
+  function pick(x, y) {
+    if (x < 0) return null
+    for (let i = order.length - 1; i >= 0; i--) { const n = order[i]; if (n.p.d > 60 && Math.hypot(x - n.p.x, y - n.p.y) < Math.max(11, n.sr * (1 + n.b * 0.5))) return n }
+    return null
+  }
+
+  // ---- Selección, panel y chips ----
+  function seleccionar(n) {
+    if (!n) { selected = null; ficha.classList.remove('abierto'); return }
+    if (!selected && !selCon) prevCam = camT
+    selected = n; selCon = n.con; focus = { node: n }
+    Atgt = [n.wx, n.wy, n.wz]; camT = 200
+    $('p-vista').style.background = `linear-gradient(135deg, rgb(${NEON[n.con.i % NEON.length]}), #161b29)`
+    $('p-vista').innerHTML = `<b>${n.con.name[0]}</b><span>${n.con.name}</span>`
+    $('f-titulo').textContent = n.name; $('f-id').textContent = `ID ${String(n.id).padStart(4, '0')} · datos de prueba`
+    $('f-resumen').textContent = `Nodo ${n.id === n.con.nodes[0].id ? 'principal' : 'satélite'} de la constelación ${n.con.name}. Información simulada para probar la interfaz.`
+    $('f-dl').innerHTML = `<dt>Estado</dt><dd>${n.est}</dd><dt>Valor</dt><dd>${n.val}</dd><dt>Variación</dt><dd>${n.delta > 0 ? '+' : ''}${n.delta}%</dd><dt>Latencia</dt><dd>${n.lat} ms</dd><dt>Conexiones</dt><dd>${n.deg}</dd>`
+    const col = `rgb(${TEMAS[tema].nodo(n)})`
+    $('spark').innerHTML = `<polyline points="${n.spark.map((v, i) => `${(i / 19) * 100},${30 - (v / 100) * 28}`).join(' ')}" fill="none" stroke="${tema === 'sombras' ? '#151821' : col}" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`
+    $('f-tags').replaceChildren(...[...new Set(n.tags)].map((t) => Object.assign(document.createElement('span'), { className: 'tag', textContent: t })))
+    ficha.classList.add('abierto'); pintarChips()
+  }
+  function enfocarCon(c) {
+    if (selCon === c && !selected) { limpiar(); return }
+    if (!selected && !selCon) prevCam = camT
+    selected = null; ficha.classList.remove('abierto'); selCon = c; focus = { con: c }
+    camT = Math.hypot(c.cx, c.cy, c.cz) + 380; pintarChips()
+  }
+  function limpiar() { selected = null; selCon = null; focus = null; camT = prevCam; ficha.classList.remove('abierto'); pintarChips() }
+  function pintarChips() {
+    chipsEl.replaceChildren()
+    cons.forEach((c) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', String(selCon === c))
+      if (TEMAS[tema].neon) { const i = document.createElement('i'); const col = `rgb(${NEON[c.i % NEON.length]})`; i.style.background = col; i.style.boxShadow = '0 0 6px ' + col; b.appendChild(i) }
+      const n = document.createElement('span'); n.className = 'n'; n.textContent = c.nodes.length; b.append(document.createTextNode(c.name + ' '), n)
+      b.onclick = () => enfocarCon(c); chipsEl.appendChild(b)
+    })
+  }
+  $('f-cerrar').onclick = () => limpiar()
+  $('f-con').onclick = () => { const c = selected && selected.con; if (c) { selected = null; ficha.classList.remove('abierto'); selCon = c; focus = { con: c }; camT = Math.hypot(c.cx, c.cy, c.cz) + 380; pintarChips() } }
+  function setEstado() { $('estado').textContent = `${cons.length} constelaciones · ${nodes.length} nodos · ${totalEdges} conexiones · datos de prueba` }
+
+  // ---- Entrada ----
+  cv.addEventListener('wheel', (e) => { e.preventDefault(); camT += e.deltaY * (e.ctrlKey ? 2 : 0.9) }, { passive: false })
+  const pos = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top] }
+  cv.addEventListener('pointerdown', (e) => { dragging = true; moved = 0; [lx, ly] = [e.clientX, e.clientY]; [mx, my] = pos(e); vyaw = vpitch = 0; cv.setPointerCapture(e.pointerId) })
+  cv.addEventListener('pointermove', (e) => {
+    [mx, my] = pos(e); if (!dragging) return
+    const dx = e.clientX - lx, dy = e.clientY - ly; [lx, ly] = [e.clientX, e.clientY]; moved += Math.abs(dx) + Math.abs(dy)
+    if (moved > 5) focus = null
+    yaw += dx * 0.006; pitch = clamp(pitch + dy * 0.006, -1.3, 1.3); vyaw = dx * 0.0036 * 60; vpitch = dy * 0.0036 * 60
+  })
+  cv.addEventListener('pointerup', (e) => { dragging = false; if (moved < 5) { const n = pick(...pos(e)); if (n && n !== selected) seleccionar(n); else if (n === selected && n) limpiar(); else if (selected || selCon) limpiar() } })
+  cv.addEventListener('pointerleave', () => { mx = my = -1 })
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') limpiar(); if (e.key === ' ' && e.target === document.body) { e.preventDefault(); $('bMov').click() } if (e.key === 'ArrowUp' || e.key === 'w') camT -= 120; if (e.key === 'ArrowDown' || e.key === 's') camT += 120 })
+  const alt = (id, get, set) => { const b = $(id); b.onclick = () => { set(!get()); b.setAttribute('aria-pressed', String(get())) } }
+  alt('bMov', () => moving, (v) => (moving = v)); alt('bDir', () => sameDir, (v) => (sameDir = v))
+  $('bIn').onclick = () => (camT -= 220); $('bOut').onclick = () => (camT += 220)
+  $('bReset').onclick = () => { limpiar(); camT = CAM0; yaw = 0.5; pitch = -0.32; vyaw = vpitch = 0 }
+
+  // ---- Temas ----
+  function aplicarTema(nombre) {
+    tema = nombre; document.documentElement.dataset.tema = nombre
+    document.querySelectorAll('.temas button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tema === nombre)))
+    try { localStorage.setItem('p06-tema', nombre) } catch (e) {}
+    pintarChips(); if (selected) seleccionar(selected)
+  }
+  document.querySelectorAll('.temas button').forEach((b) => b.addEventListener('click', () => aplicarTema(b.dataset.tema)))
+  aplicarTema(tema); setEstado(); resize(); worldUpdate(); requestAnimationFrame(frame)
+})()
+</script>
+</body>
+</html>

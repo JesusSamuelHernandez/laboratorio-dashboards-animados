@@ -14,6 +14,7 @@ Prototipos y muestrarios de **visualización de datos con animación**: globo 3D
 | `p03-gsap-catalog/` | Muestrario de 30 animaciones para tableros y mapas (tema claro) |
 | `p04-premium/` | 33 microinteracciones discretas para reportes (botones, controles, KPI, gráficos, mapas) |
 | `p05-portada/` | Portada animada de anillos concéntricos |
+| `p06-nodos/` | Constelaciones en órbita: 14 grupos de nodos que giran alrededor de un centro, profundidad por desenfoque, 3 temas (Sombras, Océano, Neón); clic en un nodo lo convierte en el centro del giro |
 | `portadas/` | Galería de **21 portadas** con fondo animado (red, ondas, globo, lluvia, fractales, hierba…) |
 
 Cada portada es un HTML autocontenido (canvas + JS puro). Responden al cursor, tienen modo claro/oscuro, pausa y respetan `prefers-reduced-motion`.

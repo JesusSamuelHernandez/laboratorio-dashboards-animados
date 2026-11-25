@@ -15,6 +15,7 @@ export default defineConfig({
         p03: resolve(__dirname, 'p03-gsap-catalog/index.html'),
         p04: resolve(__dirname, 'p04-premium/index.html'),
         p05: resolve(__dirname, 'p05-portada/index.html'),
+        p06: resolve(__dirname, 'p06-nodos/index.html'),
         portadas_index: resolve(__dirname, 'portadas/index.html'),
         portadas_01_anillos: resolve(__dirname, 'portadas/01-anillos.html'),
         portadas_02_red: resolve(__dirname, 'portadas/02-red.html'),
